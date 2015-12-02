@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <iostream>
-#include "MMScalar.hpp"
+#include "MatrixMul/MMScalar.hpp"
 
 using namespace std;
 
