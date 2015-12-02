@@ -1,9 +1,15 @@
 #include <string>
 #include <chrono> // for high resolution clock from STD C++
 #include <cstdio>
+#include <cstdint>
+#include <limits.h>
 
 using namespace std;
 using namespace std::chrono;
+
+#define HI 1024
+#define LO 0
+#define MMTIMES 3000
 
 template < class TYPE_T>
 class MMBase {
@@ -16,6 +22,13 @@ private:
   int D_K;
   virtual void mm ( TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) = 0;
   virtual string Name() = 0;
+  void initRandomArray(TYPE_T* arr, int size) {
+    int i = 0;
+    for (; i < size; i++) {
+      TYPE_T r3 = LO + static_cast <TYPE_T> (rand()) /( static_cast <TYPE_T> (RAND_MAX/(HI-LO)));
+      arr[i] = r3;
+    }
+  }
 
 public:
   MMBase(int M, int N, int K) {
@@ -25,20 +38,31 @@ public:
     this->D_M = M;
     this->D_N = N;
     this->D_K = K;
-    printf("Init MM A[%dx%d] * B[%dx%d] = C[%dx%d]\n",  M, K, K, N, M, N);
+    initRandomArray(this->mat_A, M*K);
+    initRandomArray(this->mat_B, K*N);
+    //initRandomArray(this->mat_C, M*K);
+    printf("MM A[%dx%d] * B[%dx%d] = C[%dx%d]\n",  M, K, K, N, M, N);
   }
   void runWithTimer() {
     runWithTimer(this->mat_A, this->mat_B, this->mat_C,
       this->D_M, this->D_N, this->D_K);
   }
+  void mmWrapper(TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) {
+    int i = 0;
+    for (; i < MMTIMES; i++) {
+      this->mm(matA, matB, matC, M, N, K);
+    }
+  }
   void runWithTimer(TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) {
       using std::chrono::duration_cast;
       using std::chrono::nanoseconds;
       typedef std::chrono::high_resolution_clock clock;
+      printf("Start Timer\n");
       high_resolution_clock::time_point t1 = clock::now();
-      this->mm(matA, matB, matC, M, N, K);
+      this->mmWrapper(matA, matB, matC, M, N, K);
       high_resolution_clock::time_point t2 = clock::now();
+      printf("End Timer\n");
       auto duration = duration_cast<microseconds>(t2 - t1).count();
-      cout << this->Name() << ":" << duration << " ms" << endl;
+      cout << this->Name() << ":" << duration/1000 << " ms" << endl;
   }
 };
