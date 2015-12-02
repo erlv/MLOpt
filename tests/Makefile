@@ -5,10 +5,13 @@ CXX_FLAGS=-O3
 CXX_NOVECT_FLAGS=-fno-vectorize
 SRC= MMScalar_test.cpp
 
-%.exe : %.cpp
+%.autovec.exe : %.cpp
 	${CXX} ${CXX_FLAGS} ${CXX_NOVECT_FLAGS} -I ../include/ -std=c++11 -fno-exceptions $< -o $@
-all: $(SRC:.cpp=.exe)
+%.noautovec.exe : %.cpp
+	${CXX} ${CXX_FLAGS} -I ../include/ -std=c++11 -fno-exceptions $< -o $@
+
+all: $(SRC:.cpp=.autovec.exe) $(SRC:.cpp=.noautovec.exe)
 
 
 clean:
-	-rm -f $(SRC:.cpp=.exe)
+	-rm -f $(SRC:.cpp=.autovec.exe) $(SRC:.cpp=.noautovec.exe)
