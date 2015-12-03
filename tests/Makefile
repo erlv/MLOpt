@@ -1,5 +1,5 @@
 CXX= clang++-3.7
-CXX_FLAGS=-O3 -Rpass=loop-vectorize -L ../lib/ -lMLOpt
+CXX_FLAGS=-O3 -Rpass=loop-vectorize ../lib/libMLOpt.so
 #CXX_FLAGS=-O0 -g3
 
 CXX_NOVECT_FLAGS=-fno-vectorize

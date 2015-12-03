@@ -15,7 +15,7 @@ public:
   MMInt8SSE (int M, int N, int K)
     :MMBase<int8_t>(M,N,K, "MMInt8SSE") {
   }
-  void mm(int8_t* matA, int8_t* matB, int8_t* matC, int M, int N, int K);
+  void mm(int8_t* matA, int8_t* matB, int8_t* matC, int M, int N, int K) override;
 };
 
 #endif //MMSSE_HEADER

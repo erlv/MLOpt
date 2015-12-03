@@ -18,6 +18,9 @@ void MMInt8SSE::MatrixTrans(int8_t* mat, int M, int N) {
 
 void MMInt8SSE::mm(int8_t* matA, int8_t* matB, int8_t* matC, int M,
   int N, int K) {
+#if DETAIL_PRINT
+    cout << "Run MM for " << this->Name() << endl;
+#endif
     if (N != 1 && K != 1) {
       assert(K%16 == 0); //Due to alignment requirement, K need to satisfy this
       MatrixTrans(matB, K, N);

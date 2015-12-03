@@ -25,9 +25,7 @@ private:
   int D_N;
   int D_K;
   virtual void mm ( TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) = 0;
-  string Name() {
-    return this->_name;
-  }
+
   void initRandomArray(TYPE_T* arr, int size) {
     int i = 0;
     for (; i < size; i++) {
@@ -37,6 +35,10 @@ private:
   }
 
 public:
+  string Name() {
+    return this->_name;
+  }
+
   MMBase(int M, int N, int K, string name) {
     this->mat_A = new TYPE_T[M*K];
     this->mat_B = new TYPE_T[K*N];
