@@ -1,3 +1,6 @@
+#ifndef MMSCALAR_HEADER
+#define MMSCALAR_HEADER
+
 #include <iostream>
 #include <string>
 #include "MMBase.hpp"
@@ -10,15 +13,9 @@ using namespace std;
 // matC: M X N
 template < class TYPE_T>
 class MMScalar: public MMBase<TYPE_T> {
-private:
-  string _name;
 public:
   MMScalar(int M, int N, int K, string postfix)
-    : MMBase<TYPE_T>(M, N, K) {
-      _name = "MMScalar<"+postfix +">";
-  }
-  string Name() override {
-    return this->_name;
+    : MMBase<TYPE_T>(M, N, K, "MMScalar<"+postfix +">")  {
   }
   void mm ( TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) override {
 #if DETAIL_PRINT
@@ -45,3 +42,4 @@ public:
     }
   }
 };
+#endif //MMSCALAR_HEADER

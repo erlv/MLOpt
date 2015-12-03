@@ -1,17 +1,21 @@
+#ifndef MMSSE_HEADER
+#define MMSSE_HEADER
+
 #include <iostream>
 #include <string>
 #include <cstdint>
-#include "MMScalar.hpp"
+#include "MMBase.hpp"
 
 using namespace std;
 
-class MMInt8SSE: public MMScalar<int8_t> {
+class MMInt8SSE: public MMBase<int8_t> {
 private:
-  string _name;
+  void MatrixTrans(int8_t* mat, int M, int N);
 public:
-  MMInt8SSE (int M, int N, int K, string postfix)
-    :MMScalar<int8_t>(M,N,K,postfix) {
-      _name = "MMInt8SSE<" + postfix + ">";
+  MMInt8SSE (int M, int N, int K)
+    :MMBase<int8_t>(M,N,K, "MMInt8SSE") {
   }
-  void mmSSE(TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K);
+  void mm(int8_t* matA, int8_t* matB, int8_t* matC, int M, int N, int K);
 };
+
+#endif //MMSSE_HEADER
