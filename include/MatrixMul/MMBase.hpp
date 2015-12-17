@@ -13,10 +13,14 @@ using namespace std::chrono;
 #define HI 1024
 #define LO 0
 #define MMTIMES 4096
+#define MMTESTTIMES 1
+
 
 template < class TYPE_T>
 class MMBase {
 private:
+  bool is_allocated;
+public:
   string _name;
   TYPE_T* mat_A;
   TYPE_T* mat_B;
@@ -24,6 +28,7 @@ private:
   int D_M;
   int D_N;
   int D_K;
+  int _MM_Times;
   virtual void mm ( TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) = 0;
 
   void initRandomArray(TYPE_T* arr, int size) {
@@ -38,8 +43,12 @@ public:
   string Name() {
     return this->_name;
   }
+  void fastMode() {
+    this->_MM_Times = MMTESTTIMES;
+  }
 
-  MMBase(int M, int N, int K, string name) {
+  MMBase(): _MM_Times(MMTIMES) {}
+  MMBase(int M, int N, int K, string name):_MM_Times(MMTIMES) {
     this->mat_A = new TYPE_T[M*K];
     this->mat_B = new TYPE_T[K*N];
     this->mat_C = new TYPE_T[M*N];
@@ -47,10 +56,19 @@ public:
     this->D_N = N;
     this->D_K = K;
     this->_name = name;
+    this->is_allocated = true;
+    srand(0);
     initRandomArray(this->mat_A, M*K);
     initRandomArray(this->mat_B, K*N);
     //initRandomArray(this->mat_C, M*K);
     printf("MM A[%dx%d] * B[%dx%d] = C[%dx%d]\n",  M, K, K, N, M, N);
+  }
+  ~MMBase() {
+    if (this->is_allocated) {
+      delete[] this->mat_A;
+      delete[] this->mat_B;
+      delete[] this->mat_C;
+    }
   }
   void runWithTimer() {
     runWithTimer(this->mat_A, this->mat_B, this->mat_C,
@@ -58,7 +76,7 @@ public:
   }
   void mmWrapper(TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) {
     int i = 0;
-    for (; i < MMTIMES; i++) {
+    for (; i < this->_MM_Times; i++) {
       this->mm(matA, matB, matC, M, N, K);
     }
   }
@@ -76,6 +94,25 @@ public:
       auto duration = duration_cast<microseconds>(t2 - t1).count();
       float gflops = (2.0 * MMTIMES * this->D_M * this->D_N * this->D_K)/((float)duration*1000);
       cout << this->Name() << " GOPS:" << gflops << endl;
+  }
+  void runOnce() {
+    this->mm(this->mat_A, this->mat_B, this->mat_C, this->D_M, this->D_N, this->D_K);
+  }
+  bool compareRes(TYPE_T* matC) {
+    int i = 0 ;
+    for (; i < (this->D_M * this->D_N); i++) {
+      if (matC[i] != this->mat_C[i]) {
+        cout << i << ":" <<  std::hex << (int)matC[i] << "!=" << (int)this->mat_C[i] << endl;
+        return false;
+      } else {
+        cout << i << ":"<< std::hex << (int)matC[i] << "==" << (int)this->mat_C[i] << endl;
+      }
+    }
+    if (i == this->D_M * this->D_N) {
+      return true;
+    } else {
+      return false;
+    }
   }
 };
 #endif //MMBASE_HEADER

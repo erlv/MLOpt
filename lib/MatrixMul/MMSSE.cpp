@@ -2,6 +2,7 @@
 #include <x86intrin.h>
 
 #include "MatrixMul/MMSSE.hpp"
+#include "MatrixMul/MMScalar.hpp"
 
 
 void MMInt8SSE::MatrixTrans(int8_t* mat, int M, int N) {
@@ -45,4 +46,18 @@ void MMInt8SSE::mm(int8_t* matA, int8_t* matB, int8_t* matC, int M,
         matC[i*N + j] = (int8_t)_mm_extract_epi32(v_2, 0);
       }
     }
+  }
+
+  void MMInt8SSE::verifyResult() {
+    int8_t* mat_Cseq = new int8_t[this->D_M * this->D_N];
+    MMScalar<int8_t> mmobj_verify(this->mat_A, this->mat_B, mat_Cseq, this->D_M,
+                                  this->D_N, this->D_K);
+    mmobj_verify.runOnce();
+    if (mmobj_verify.compareRes(this->mat_C)) {
+      printf("%s verify: PASS\n", this->_name.c_str());
+    } else {
+      printf("%s verify: FAIL\n", this->_name.c_str());
+    }
+
+    delete[] mat_Cseq;
   }
