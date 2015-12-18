@@ -23,7 +23,7 @@ int int8SSEVSint8mini() {
 #endif
 
   MMInt8SSE mmobj_ssechar(16, 1, 32);
-  mmobj_char.fastMode();
+  mmobj_ssechar.fastMode();
   mmobj_ssechar.runWithTimer();
   mmobj_ssechar.verifyResult();
   return 0;
