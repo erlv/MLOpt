@@ -1,6 +1,5 @@
 #include <cassert>
 #include <x86intrin.h>
-
 #include "MatrixMul/MMSSE.hpp"
 #include "MatrixMul/MMScalar.hpp"
 
@@ -17,7 +16,7 @@ void MMInt8SSE::MatrixTrans(int8_t* mat, int M, int N) {
   }
 }
 
-void MMInt8SSE::mm(int8_t* matA, int8_t* matB, int8_t* matC, int M,
+void MMInt8SSE::mm(int8_t *__restrict__ matA, int8_t *__restrict__ matB, int8_t *__restrict__ matC, int M,
   int N, int K) {
 #if DETAIL_PRINT
     cout << "Run MM for " << this->Name() << endl;
@@ -29,21 +28,21 @@ void MMInt8SSE::mm(int8_t* matA, int8_t* matB, int8_t* matC, int M,
     int i,j,k;
     for (i = 0; i < M; i++) {
       for (j = 0; j < N; j++) {
-        __m128i v_res = _mm_setzero_si128();
+        __m128i v_res_8 = _mm_setzero_si128();
         for (k=0; k < K; k+=16) {
-          __m128i v_A = _mm_load_si128((__m128i *)&matA[i*K + k]);
-          __m128i v_B = _mm_load_si128((__m128i *)&matB[j*N + k]);
-          __m128i v_1 = _mm_maddubs_epi16(v_A, v_B);
-          v_res = _mm_add_epi16(v_res, v_1);
+          __m128i v_A_16 = _mm_load_si128((__m128i *)&matA[i*K + k]);
+          __m128i v_B_16 = _mm_load_si128((__m128i *)&matB[j*N + k]);
+          __m128i v_1_8 = _mm_maddubs_epi16(v_A_16, v_B_16);
+          v_res_8 = _mm_add_epi16(v_res_8, v_1_8);
         }
-        __m128i v_lo = _mm_cvtepi16_epi32(v_res);
-        __m128i v_hi = _mm_cvtepi16_epi32(_mm_shuffle_epi32(v_res, 0x4e));
-        __m128i v_2 = _mm_add_epi32(v_lo, v_hi); //sum in the  4x32b
-        v_hi = _mm_shuffle_epi32(v_2, 0x4e);
-        v_2 = _mm_add_epi32(v_2, v_hi); // sum in the lower 2x32b of v_2
-        v_hi = _mm_shuffle_epi32(v_2, 0xe1);
-        v_2 = _mm_add_epi32(v_2, v_hi); // sum in the lower 1x32b of v_2
-        matC[i*N + j] = (int8_t)_mm_extract_epi32(v_2, 0);
+        __m128i v_lo_4 = _mm_cvtepi16_epi32(v_res_8);
+        __m128i v_hi_4 = _mm_cvtepi16_epi32(_mm_shuffle_epi32(v_res_8, 0x4e));
+        __m128i v_int_4 = _mm_add_epi32(v_lo_4, v_hi_4); //sum in the  4x32b
+        v_hi_4 = _mm_shuffle_epi32(v_int_4, 0x4e);
+        v_int_4 = _mm_add_epi32(v_int_4, v_hi_4); // sum in the lower 2x32b of v_2
+        v_hi_4 = _mm_shuffle_epi32(v_int_4, 0xe1);
+        v_int_4 = _mm_add_epi32(v_int_4, v_hi_4); // sum in the lower 1x32b of v_2
+        matC[i*N + j] = (int8_t)_mm_extract_epi32(v_int_4, 0);
       }
     }
   }
@@ -60,4 +59,17 @@ void MMInt8SSE::mm(int8_t* matA, int8_t* matB, int8_t* matC, int M,
     }
 
     delete[] mat_Cseq;
+  }
+
+  void MMInt8SSE::initRandomArray(int8_t* arr, int size)  {
+    int i = 0;
+    for (; i < size; i++) {
+      int8_t r3 = LO + static_cast <int8_t> (rand()) % 3;
+
+#if DETAIL_PRINT
+      printf("call int8sse init, init as %d\n", r3);
+#endif
+
+      arr[i] = r3;
+    }
   }

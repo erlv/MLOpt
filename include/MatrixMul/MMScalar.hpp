@@ -25,8 +25,9 @@ public:
     this->D_N = N;
     this->D_K = K;
     this->_name = "MMScalarVerifier";
+    this->is_allocated = false;
   }
-  void mm ( TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) override {
+  void mm ( TYPE_T *__restrict__ matA, TYPE_T *__restrict__ matB, TYPE_T *__restrict__ matC, int M, int N, int K) override {
 #if DETAIL_PRINT
     cout << "Run MM for " << this->Name() << endl;
 #endif

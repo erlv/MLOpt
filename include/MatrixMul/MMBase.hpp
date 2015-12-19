@@ -14,13 +14,20 @@ using namespace std::chrono;
 #define LO 0
 #define MMTIMES 4096
 #define MMTESTTIMES 1
-
+#ifdef MINITEST
+#define PRE_D_M 64
+#define PRE_D_N 1
+#define PRE_D_K 64
+#else
+#define PRE_D_M 512
+#define PRE_D_N 1
+#define PRE_D_K 2048
+#endif
 
 template < class TYPE_T>
 class MMBase {
-private:
-  bool is_allocated;
 public:
+  bool is_allocated;
   string _name;
   TYPE_T* mat_A;
   TYPE_T* mat_B;
@@ -29,9 +36,9 @@ public:
   int D_N;
   int D_K;
   int _MM_Times;
-  virtual void mm ( TYPE_T* matA, TYPE_T* matB, TYPE_T* matC, int M, int N, int K) = 0;
+  virtual void mm ( TYPE_T *__restrict__  matA, TYPE_T *__restrict__ matB, TYPE_T *__restrict__ matC, int M, int N, int K) = 0;
 
-  void initRandomArray(TYPE_T* arr, int size) {
+  virtual void initRandomArray(TYPE_T* arr, int size) {
     int i = 0;
     for (; i < size; i++) {
       TYPE_T r3 = LO + static_cast <TYPE_T> (rand()) /( static_cast <TYPE_T> (RAND_MAX/(HI-LO)));
@@ -58,9 +65,6 @@ public:
     this->_name = name;
     this->is_allocated = true;
     srand(0);
-    initRandomArray(this->mat_A, M*K);
-    initRandomArray(this->mat_B, K*N);
-    //initRandomArray(this->mat_C, M*K);
     printf("MM A[%dx%d] * B[%dx%d] = C[%dx%d]\n",  M, K, K, N, M, N);
   }
   ~MMBase() {
@@ -69,6 +73,11 @@ public:
       delete[] this->mat_B;
       delete[] this->mat_C;
     }
+  }
+  void initArray() {
+    initRandomArray(this->mat_A, this->D_M * this->D_K);
+    initRandomArray(this->mat_B, this->D_K * this->D_N);
+    //initRandomArray(this->mat_C, M*K);
   }
   void runWithTimer() {
     runWithTimer(this->mat_A, this->mat_B, this->mat_C,
@@ -84,9 +93,9 @@ public:
       using std::chrono::duration_cast;
       using std::chrono::nanoseconds;
       typedef std::chrono::high_resolution_clock clock;
-      printf("Warmup\n");
+      printf("Warmup...........");
       this->mmWrapper(matA, matB, matC, M, N, K);
-      printf("Start Timer\n");
+      printf("Start Timer.............");
       high_resolution_clock::time_point t1 = clock::now();
       this->mmWrapper(matA, matB, matC, M, N, K);
       high_resolution_clock::time_point t2 = clock::now();
@@ -102,10 +111,14 @@ public:
     int i = 0 ;
     for (; i < (this->D_M * this->D_N); i++) {
       if (matC[i] != this->mat_C[i]) {
-        cout << i << ":" <<  std::hex << (int)matC[i] << "!=" << (int)this->mat_C[i] << endl;
+        cout << i << ":" <<  std::hex << (int)matC[i] << "!="
+             << (int)this->mat_C[i] << std::dec << endl;
         return false;
       } else {
-        cout << i << ":"<< std::hex << (int)matC[i] << "==" << (int)this->mat_C[i] << endl;
+#if DETAIL_PRINT
+        cout << i << ":"<< std::hex << (int)matC[i] << "=="
+             << (int)this->mat_C[i] << std::dec << endl;
+#endif // DETAIL_PRINT
       }
     }
     if (i == this->D_M * this->D_N) {

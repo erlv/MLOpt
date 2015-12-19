@@ -15,8 +15,9 @@ public:
   MMInt8SSE (int M, int N, int K)
     :MMBase<int8_t>(M,N,K, "MMInt8SSE") {
   }
-  void mm(int8_t* matA, int8_t* matB, int8_t* matC, int M, int N, int K) override;
+  void mm(int8_t *__restrict__ matA, int8_t *__restrict__ matB, int8_t *__restrict__ matC, int M, int N, int K) override;
   void verifyResult();
+  virtual void initRandomArray(int8_t* arr, int size) override;
 };
 
 #endif //MMSSE_HEADER
