@@ -77,8 +77,28 @@ public:
   void initArray() {
     initRandomArray(this->mat_A, this->D_M * this->D_K);
     initRandomArray(this->mat_B, this->D_K * this->D_N);
-    //initRandomArray(this->mat_C, M*K);
+
+#if DETAIL_PRINT
+    cout << "Print Mat_A" << endl;
+    printArray(this->mat_A, this->D_M, this->D_K);
+    cout << "Print Mat_B" << endl;
+    printArray(this->mat_B, this->D_K, this->D_N);
+#endif
+
   }
+  void printArray(TYPE_T* mat, int M, int N) {
+    int i,j;
+    for (i=0; i < N; i++) {
+      for (j=0; j < M; j++) {
+        cout << (int)mat[i*N + j];
+        if (j < (M-1)) {
+          cout << "\t";
+        }
+      }
+      cout << endl;
+    }
+  }
+
   void runWithTimer() {
     runWithTimer(this->mat_A, this->mat_B, this->mat_C,
       this->D_M, this->D_N, this->D_K);

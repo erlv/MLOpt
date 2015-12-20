@@ -7,10 +7,6 @@
 
 using namespace std;
 
-// MM of matA, matB result in matC.
-// matA: M X K
-// matB: K X N
-// matC: M X N
 template < class TYPE_T>
 class MMScalar: public MMBase<TYPE_T> {
 public:
@@ -37,20 +33,13 @@ public:
         TYPE_T res = 0;
         for (k=0; k < K; k++) {
           res += matA[i*K + k] * matB[k*N + j];
-#if DETAIL_PRINT
-          printf("matA[%d]=", i*K+k);
-          cout << std::hex << (int)matA[i*K + k];
-          printf(", matB[%d]=", k*N+j);
-          cout << std::hex << (int)matB[k*N+j];
-          printf(", * = 0x%x\n", (matA[i*K + k] * matB[k*N+j]));
-#endif
         }
-#if DETAIL_PRINT
-        cout << "res=" << res << endl;
-#endif
         matC[i*N + j] = res;
       }
     }
+#if DETAIL_PRINT
+    this->printArray(matC, M, N);
+#endif
   }
 };
 #endif //MMSCALAR_HEADER
